@@ -13,7 +13,7 @@ func main() {
 	//  Prepare our subscriber
 	subscriber, _ := zmq.NewSocket(zmq.SUB)
 	defer subscriber.Close()
-	subscriber.Connect("tcp://localhost:5560")
+	subscriber.Connect("tcp://zmqproxy:5560")
 	
 	topics := []string{"CustomerNotification"}
 	for _, topic := range topics {

@@ -31,7 +31,7 @@ func main() {
 func sendNotification_thread (topic string, c chan string){
 	publisher, _ := zmq.NewSocket(zmq.PUB)
 	defer publisher.Close()
-	publisher.Connect("tcp://localhost:5559")
+	publisher.Connect("tcp://zmqpoxy:5559")
 	
 	for{ 
 		v:= <- c
@@ -49,7 +49,7 @@ func sub_thread(topics []string, c chan string){
 	
 	subscriber, _ := zmq.NewSocket(zmq.SUB)
 	defer subscriber.Close()
-	subscriber.Connect("tcp://localhost:5560")
+	subscriber.Connect("tcp://zmqproxy:5560")
 	
 	for _, topic := range topics {
 		subscriber.SetSubscribe(topic)

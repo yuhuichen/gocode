@@ -15,7 +15,7 @@ func main() {
 	//  Prepare our publisher
 	publisher, _ := zmq.NewSocket(zmq.PUB)
 	defer publisher.Close()
-	publisher.Connect("tcp://localhost:5559")
+	publisher.Connect("tcp://zmqproxy:5559")
 	
 	var topic = "CustomerRegistration"
 	var n = 0
