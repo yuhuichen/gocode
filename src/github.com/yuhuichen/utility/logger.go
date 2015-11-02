@@ -37,6 +37,7 @@ func Init(
         log.Ldate|log.Ltime|log.Lshortfile)
 }
 
+/*
 func main() {
     Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 
@@ -45,3 +46,4 @@ func main() {
     Warning.Println("There is something you need to know about")
     Error.Println("Something has failed")
 }
+*/

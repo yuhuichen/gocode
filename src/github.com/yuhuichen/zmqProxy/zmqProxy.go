@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-const frontend_url_port ="tcp://*:5563"
-const backend_url_port = "tcp://*:5564"
+const frontend_url_port ="tcp://*:5559"
+const backend_url_port = "tcp://*:5560"
 
 func listener_thread() { 
 	pipe, _ := zmq.NewSocket(zmq.PAIR) 
@@ -48,6 +48,10 @@ func main() {
 	listener, _ := zmq.NewSocket(zmq.PAIR) 
 	listener.Connect("inproc://pipe") 
 
+	log.Println("0MQ proxy started!")
+	log.Println("Frontend protocl/url/port:", frontend_url_port)
+	log.Println("Backend protocol/url/port:", backend_url_port)
+	
 	//  Run the proxy until the user interrupts us
 	err := zmq.Proxy(frontend, backend, listener)
 	log.Fatalln("Proxy interrupted:", err)

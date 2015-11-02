@@ -6,8 +6,10 @@ package main
 
 import (
 	zmq "github.com/pebbe/zmq4"
-	"fmt"
 	"time"
+	"log"
+	"strings"
+	"fmt"
 )
 
 const max_num_msg = 1000	//set threshold before blocking
@@ -15,9 +17,8 @@ const max_num_msg = 1000	//set threshold before blocking
 func main() {
 	
 	//initPublisher()
-	//  Prepare our subscriber
-	
-	sub_topics := []string{"CustomerRegistration", "b", "c", "d"}
+	//  Prepare our subscriber	
+	sub_topics := []string{"CustomerRegistration"}
 	pub_topic := "CustomerNotification"	
 	 	
 	msg_chan := make(chan string, max_num_msg)
@@ -30,16 +31,16 @@ func main() {
 func sendNotification_thread (topic string, c chan string){
 	publisher, _ := zmq.NewSocket(zmq.PUB)
 	defer publisher.Close()
-	publisher.Connect("tcp://localhost:5563")
-
-	msg := "Thank you for your business"
+	publisher.Connect("tcp://localhost:5559")
 	
 	for{ 
 		v:= <- c
-		fmt.Printf("[%s] %s\n", "Got: ", v)
+		cid := strings.Split(v, ":")
+		msg := fmt.Sprintf("%s %s %s", "Dear Mr.", cid[1], ", Thank you for your business!")		
 		publisher.Send(topic, zmq.SNDMORE)
 		publisher.Send(msg, 0)
-		Printf("[%s] %s\n", "Sent message: ", msg)
+		log.Printf("<%s> %s", "Sending greeting message", msg)
+		log.Println()
 		time.Sleep(time.Second)
 	}
 }
@@ -48,7 +49,7 @@ func sub_thread(topics []string, c chan string){
 	
 	subscriber, _ := zmq.NewSocket(zmq.SUB)
 	defer subscriber.Close()
-	subscriber.Connect("tcp://localhost:5564")
+	subscriber.Connect("tcp://localhost:5560")
 	
 	for _, topic := range topics {
 		subscriber.SetSubscribe(topic)
@@ -58,7 +59,7 @@ func sub_thread(topics []string, c chan string){
 		address, _ := subscriber.Recv(0)
 		//  Read message contents
 		contents, _ := subscriber.Recv(0)
-		fmt.Printf("[%s] %s\n", address, contents)
+		log.Printf("[%s] %s\n", address, contents)
 		c <- contents
 	}
 	
