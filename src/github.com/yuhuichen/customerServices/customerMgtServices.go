@@ -13,25 +13,25 @@ import (
 )
 
 const max_num_msg = 1000	//set threshold before blocking
+const	pub_zmq_url_port = "tcp://zmqproxy:5559"
+const	sub_zmq_url_port = "tcp://zmqproxy:5560"
+var	sub_topics = []string{"CustomerRegistration"}
+var	pub_topic = "CustomerNotification"	
+
 
 func main() {
 	
-	//initPublisher()
-	//  Prepare our subscriber	
-	sub_topics := []string{"CustomerRegistration"}
-	pub_topic := "CustomerNotification"	
-	 	
 	msg_chan := make(chan string, max_num_msg)
 	go sub_thread(sub_topics, msg_chan)
-	go sendNotification_thread(pub_topic, msg_chan)
+	go pub_thread(pub_topic, msg_chan)
 	ch := make(chan bool)
 	ch <- true			//block the application from existing
 }
 
-func sendNotification_thread (topic string, c chan string){
+func pub_thread (topic string, c chan string){
 	publisher, _ := zmq.NewSocket(zmq.PUB)
 	defer publisher.Close()
-	publisher.Connect("tcp://zmqpoxy:5559")
+	publisher.Connect(pub_zmq_url_port)
 	
 	for{ 
 		v:= <- c
@@ -41,7 +41,7 @@ func sendNotification_thread (topic string, c chan string){
 		publisher.Send(msg, 0)
 		log.Printf("<%s> %s", "Sending greeting message", msg)
 		log.Println()
-		time.Sleep(time.Second)
+		time.Sleep(time.Microsecond*10)
 	}
 }
 
@@ -49,7 +49,7 @@ func sub_thread(topics []string, c chan string){
 	
 	subscriber, _ := zmq.NewSocket(zmq.SUB)
 	defer subscriber.Close()
-	subscriber.Connect("tcp://zmqproxy:5560")
+	subscriber.Connect(sub_zmq_url_port)
 	
 	for _, topic := range topics {
 		subscriber.SetSubscribe(topic)
