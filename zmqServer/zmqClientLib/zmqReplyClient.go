@@ -3,13 +3,13 @@ package zmqClientLib
 import (
 	zmq "github.com/pebbe/zmq4"
 	"log"
-	
+	"sync"
 )
 
 
 // not really useful in request/reply mode. But worth having this code, perhaps as an example. 
-func reply_thread(zmq_url_port string, request_chan chan string, reply_chan chan string){
-		
+func Reply_thread(wg sync.WaitGroup, zmq_url_port string, request_chan chan string, reply_chan chan string){
+	defer wg.Done()
 	responder, _ := zmq.NewSocket(zmq.REP)
 	defer responder.Close()
 	responder.Connect(zmq_url_port)
@@ -29,8 +29,8 @@ func reply_thread(zmq_url_port string, request_chan chan string, reply_chan chan
 }
 
 // not really useful in request/reply mode. But worth having this code, perhaps as an example. 
-func reply_bytes_thread(zmq_url_port string, request_chan chan []byte, reply_chan chan []byte){
-		
+func Reply_bytes_thread(wg sync.WaitGroup, zmq_url_port string, request_chan chan []byte, reply_chan chan []byte){
+	defer wg.Done()	
 	responder, _ := zmq.NewSocket(zmq.REP)
 	defer responder.Close()
 	responder.Connect(zmq_url_port)

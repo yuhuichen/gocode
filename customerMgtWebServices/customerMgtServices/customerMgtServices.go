@@ -16,7 +16,10 @@ func MgtService_thread(wg sync.WaitGroup, serverURI string) {
 	r.POST("/customer", cc.CreateCustomer)
 	r.GET("/customer/:id", cc.GetCustomer)
 	r.DELETE("/customer/:id", cc.RemoveCustomer)
-	http.ListenAndServe("serverURI", r)
+	
+	log.Printf("Mgt Service started: [%s]\n", serverURI)
+
+	http.ListenAndServe(serverURI, r)
 	log.Fatalln("Service crashed!")
 }
 

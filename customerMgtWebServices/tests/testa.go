@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-
-
 func zmq_req(zmq_url_port string, msg string) (string, error){	
 	requester, _ := zmq.NewSocket(zmq.REQ)
 	defer requester.Close()

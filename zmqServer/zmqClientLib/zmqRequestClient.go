@@ -21,6 +21,6 @@ func Req_bytes (zmq_url_port string, msg []byte) ([]byte, error){
 	requester.Connect(zmq_url_port)
 	requester.SendBytes(msg, 0)
 	reply, err := requester.RecvBytes(0)
-	log.Println(reply, err.Error())
+	//log.Println(string(reply), err.Error())
 	return reply, err
 }

@@ -36,7 +36,7 @@ func getSession() *mgo.Session {
 }
 
 func (cc CustomerController) GetCustomer(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	id := p.ByName("id")
+	id := p.ByName("id") p.
 	
 	if !bson.IsObjectIdHex(id) {
 		w.WriteHeader(404)

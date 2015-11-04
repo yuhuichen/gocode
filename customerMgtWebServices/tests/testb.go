@@ -67,16 +67,15 @@ func zmq_reply_byte(zmq_url_port string){
 		
 		//c := Customer{}	
 		//json.Unmarshal(opt.Customer, &c)
-		cj, _ := json.Marshal(opt.Customer)
+		//cj, _ := json.Marshal(opt.Customer)
 		
-		reply_msg := cj
+		reply_msg := []byte{}
 		responder.SendBytes(reply_msg, 0)
 		log.Printf("Sent reply: [%s]\n", reply_msg)
 	}
 }
 
-/*
-func main(){
+
+func main1(){
 	zmq_reply_byte("tcp://localhost:5556")
 }
-*/

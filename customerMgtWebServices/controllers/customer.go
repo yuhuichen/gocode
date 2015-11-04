@@ -8,35 +8,32 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/yuhuichen/customerMgtWebServices/models"
 	zmqClient "github.com/yuhuichen/zmqServer/zmqClientLib"
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-const debug = true
-const zmq_broker_frontend_url_port ="tcp://localhost:5555"
-const zmq_broker_backend_url_port = "tcp://localhost:5566"
-const dbName = "customerMicroServices"
-const collectionName = "customers"
-const mongoServer = "mongodb://mongodb"
-
+var (
+	debug bool
+	zmq_broker_frontend_url_port string
+ 	zmq_broker_backend_url_port string
+)
 
 type (
 	CustomerController struct {
-		session *mgo.Session
+		//session interface{}
 	}
 )
 
-func NewCustomerController() *CustomerController {
-	return &CustomerController{getSession()}
+func init(){
+	debug = true
+	zmq_broker_frontend_url_port ="tcp://localhost:5555"
+	zmq_broker_backend_url_port = "tcp://localhost:5556"
+	log.Println("ZeroMQ broker ports:")
+	log.Printf("Frontend: [%s]\n", zmq_broker_frontend_url_port)
+	log.Printf("Backend: [%s]\n", zmq_broker_backend_url_port)
 }
 
-func getSession() *mgo.Session {
-
-	s, err := mgo.Dial(mongoServer)		//using docker container link
-	if err != nil {
-		panic(err)
-	}
-	return s
+func NewCustomerController() *CustomerController {
+	return &CustomerController{}
 }
 
 func (cc CustomerController) GetCustomer(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -72,21 +69,21 @@ func (cc CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Reque
 
 	c := models.Customer{}
 	json.NewDecoder(r.Body).Decode(&c)
-	c.Id = bson.NewObjectId()
+	//c.Id = bson.NewObjectId()
 	
 	opt := models.OptCinfo{}
 	opt.Opt = "INSERT"	
 	opt.Customer = &c
 	optj, _ := json.Marshal(opt)
 	
-	if _, err := zmqClient.Req_bytes(zmq_broker_frontend_url_port, optj); err != nil {
-		
+	reply, err := zmqClient.Req_bytes(zmq_broker_frontend_url_port, optj)
+	if err != nil {
 		log.Println(c.Id, err.Error())
 		w.WriteHeader(404)
 		return
 	}
 
-	cj, _ := json.Marshal(c)
+	cj, _ := json.Marshal(reply)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 	
