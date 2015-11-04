@@ -7,30 +7,18 @@ import (
 	"log"
 	"github.com/julienschmidt/httprouter"
 	"github.com/yuhuichen/customerMgtWebServices/models"
+	zmqClient "github.com/yuhuichen/zmqServer/zmqClientLib"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-const zmq_broker_frontend_url_port ="tcp://*:5555"
-const zmq_broker_backend_url_port = "tcp://*:5566"
+const debug = true
+const zmq_broker_frontend_url_port ="tcp://localhost:5555"
+const zmq_broker_backend_url_port = "tcp://localhost:5566"
 const dbName = "customerMicroServices"
 const collectionName = "customers"
 const mongoServer = "mongodb://mongodb"
 
-
-type (	
-	InsertMsg struct {
-		Opt				string `json:"opt" bson:"opt"`
-		*models.Customer			
-	}		
-)
-
-type (	
-	queryMsg struct {
-		Opt				string `json:"opt" bson:"opt"`
-		Id 				bson.ObjectId 	`json:"id" bson:"_id"`			
-	}		
-)
 
 type (
 	CustomerController struct {
@@ -61,12 +49,12 @@ func (cc CustomerController) GetCustomer(w http.ResponseWriter, r *http.Request,
 
 	oid := bson.ObjectIdHex(id)
 	
-	opt := queryMsg{}
+	opt := models.OptKey{}
 	opt.Opt = "GET"	
 	opt.Id = oid
 	optj, _ := json.Marshal(opt)
 	
-	cj, err := zmq_req(zmq_broker_frontend_url_port, optj)
+	cj, err := zmqClient.Req_bytes(zmq_broker_frontend_url_port, optj)
 	
 	if err != nil {
 		log.Println(id, err.Error())
@@ -86,12 +74,12 @@ func (cc CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Reque
 	json.NewDecoder(r.Body).Decode(&c)
 	c.Id = bson.NewObjectId()
 	
-	opt := InsertMsg{}
+	opt := models.OptCinfo{}
 	opt.Opt = "INSERT"	
 	opt.Customer = &c
 	optj, _ := json.Marshal(opt)
 	
-	if _, err := zmq_req(zmq_broker_frontend_url_port, optj); err != nil {
+	if _, err := zmqClient.Req_bytes(zmq_broker_frontend_url_port, optj); err != nil {
 		
 		log.Println(c.Id, err.Error())
 		w.WriteHeader(404)
@@ -115,12 +103,12 @@ func (cc CustomerController) RemoveCustomer(w http.ResponseWriter, r *http.Reque
 
 	oid := bson.ObjectIdHex(id)
 	
-	opt := queryMsg{}
+	opt := models.OptKey{}
 	opt.Opt = "GET"	
 	opt.Id = oid
 	optj, _ := json.Marshal(opt)
 	
-	if _, err := zmq_req(zmq_broker_frontend_url_port, optj); err != nil {
+	if _, err := zmqClient.Req_bytes(zmq_broker_frontend_url_port, optj); err != nil {
 		log.Println(id, err.Error())
 		w.WriteHeader(404)
 		return

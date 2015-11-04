@@ -7,15 +7,17 @@
 package main
 
 import (
-	zmq "github.com/pebbe/zmq4"
+	zmq "github.com/pebbe/zmq4"	
 	"log"
 )
 
+const debug = true
 const frontend_url_port ="tcp://*:5555"
-const backend_url_port = "tcp://*:5566"
+const backend_url_port = "tcp://*:5556"
 
 func main() {
 
+	//config := ReadConfig("")
 	//  Prepare our sockets
 	frontend, _ := zmq.NewSocket(zmq.ROUTER)
 	defer frontend.Close()
@@ -47,6 +49,8 @@ func main() {
 						backend.Send(msg, 0)
 						break
 					}
+					if debug {log.Printf("relayed request: [%s]\n", msg)}
+					
 				}
 			case backend:
 				for {
@@ -57,7 +61,9 @@ func main() {
 						frontend.Send(msg, 0)
 						break
 					}
+					if debug {log.Printf("relayed reply: [%s]\n", msg)}
 				}
+				
 			}
 		}
 	}

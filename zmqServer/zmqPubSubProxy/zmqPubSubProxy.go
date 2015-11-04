@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-const frontend_url_port ="tcp://*:5559"
-const backend_url_port = "tcp://*:5560"
+const proxy_frontend_url_port ="tcp://*:5559"
+const proxy_backend_url_port = "tcp://*:5560"
 
 func listener_thread() { 
 	pipe, _ := zmq.NewSocket(zmq.PAIR) 
@@ -37,19 +37,19 @@ func main() {
 	//  This is where the weather server sits
 	frontend, _ := zmq.NewSocket(zmq.XSUB)
 	defer frontend.Close()
-	frontend.Bind(frontend_url_port)
+	frontend.Bind(proxy_frontend_url_port)
 	
 	//  This is our public endpoint for subscribers
 	backend, _ := zmq.NewSocket(zmq.XPUB)
 	defer backend.Close()
-	backend.Bind(backend_url_port)
+	backend.Bind(proxy_backend_url_port)
 	
 	listener, _ := zmq.NewSocket(zmq.PAIR) 
 	listener.Connect("inproc://pipe") 
 
 	log.Println("0MQ proxy started!")
-	log.Println("Frontend protocl/url/port:", frontend_url_port)
-	log.Println("Backend protocol/url/port:", backend_url_port)
+	log.Println("Frontend protocl/url/port:", proxy_frontend_url_port)
+	log.Println("Backend protocol/url/port:", proxy_backend_url_port)
 	
 	//  Run the proxy until the user interrupts us
 	err := zmq.Proxy(frontend, backend, listener)

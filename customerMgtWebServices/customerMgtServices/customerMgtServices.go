@@ -1,24 +1,22 @@
-package main
+package customerMgtServices
 
 import (
-
+	"sync"
+	"log"
 	"net/http"
 	"github.com/julienschmidt/httprouter"
-	"github.com/yuhuichen/customerMgtMicroServices/controllers"
-
+	"github.com/yuhuichen/customerMgtWebServices/controllers"
 )
 
-const serverURI = "localhost:5001"
-func main() {
+func MgtService_thread(wg sync.WaitGroup, serverURI string) {
+	defer wg.Done()
 	// Instantiate a new router
 	r := httprouter.New()
-
 	cc := controllers.NewCustomerController()
-
 	r.POST("/customer", cc.CreateCustomer)
 	r.GET("/customer/:id", cc.GetCustomer)
 	r.DELETE("/customer/:id", cc.RemoveCustomer)
-
 	http.ListenAndServe("serverURI", r)
+	log.Fatalln("Service crashed!")
 }
 
